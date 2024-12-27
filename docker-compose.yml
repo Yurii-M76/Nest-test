@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: postgres17
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=test_db
+      - POSTGRES_DATA=/data/postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./src/postgres-data:/data/postgres
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d test_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgAdmin:
+    image: dpage/pgadmin4
+    container_name: pg-admin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@mail.ru
+      - PGADMIN_DEFAULT_PASSWORD=123456
+      - PGADMIN_LISTEN_PORT=5433
+    ports:
+      - 5433:5433
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: always
+
+networks:
+  planner_network:
+    driver: bridge
